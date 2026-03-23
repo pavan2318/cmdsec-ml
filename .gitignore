@@ -1,0 +1,17 @@
+# Rust
+/target/
+
+# Generated datasets / features
+train.json
+test.json
+train.csv
+test.csv
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Env files
+.env
