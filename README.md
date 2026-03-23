@@ -1,3 +1,5 @@
+![CI](https://github.com/pavan2318/cmdsec-ml/actions/workflows/rust.yml/badge.svg)
+
 # cmdsec-ml
 
 Rust prototype for detecting obfuscated command-line payloads using rule-based and ML approaches.
