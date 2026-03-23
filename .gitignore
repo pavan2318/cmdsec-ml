@@ -15,3 +15,5 @@ Thumbs.db
 
 # Env files
 .env
+dataset.json
+features.csv
