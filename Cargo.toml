@@ -2,6 +2,9 @@
 name = "cmdsec-ml"
 version = "0.1.0"
 edition = "2024"
+description = "Detection of obfuscated command-line payloads using rule-based and ML approaches"
+license = "MIT"
+repository = "https://github.com/pavan2318/cmdsec-ml"
 
 [dependencies]
 rand = "0.8"
