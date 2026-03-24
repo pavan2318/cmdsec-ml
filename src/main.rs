@@ -13,6 +13,7 @@ fn main() {
         println!("cargo run -- generate");
         println!("cargo run -- features-train");
         println!("cargo run -- features-test");
+        println!("cargo run -- freeze-baseline");
         return;
     }
 
@@ -23,7 +24,14 @@ fn main() {
         "rules-train" => rules::evaluate("train.json"),
         "rules-test" => rules::evaluate("test.json"),    
         "ml-train" => ml::run_train("train.csv"),
-        "ml-test" => ml::run_test("train.csv", "test.csv"),    
+        "ml-test" => ml::run_test("train.csv", "test.csv"),
+        "freeze-baseline" => {
+    ml::export_baseline_predictions(
+        "train.csv",
+        "test.csv",
+        "test.json",
+        "artifacts/baseline-v1/predictions/test_predictions_combined.csv",
+    ).unwrap();}
         _ => println!("Unknown command"),
     }
 }

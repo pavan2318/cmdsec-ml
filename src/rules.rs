@@ -1,7 +1,7 @@
 use crate::dataset::Command;
 use std::fs;
 
-fn predict(cmd: &str) -> u8 {
+pub fn predict(cmd: &str) -> u8 {
     let s = cmd.to_lowercase();
 
     if s.contains("powershell -enc") { return 1; }

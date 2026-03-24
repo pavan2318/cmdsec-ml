@@ -104,5 +104,78 @@ println!("Accuracy: {:.4}", accuracy);
 
 Ok(accuracy)
 
+}
 
+use crate::dataset::Command;
+use crate::rules;
+use std::fs;
+use std::io::Write;
+
+pub fn export_baseline_predictions(
+    train_csv: &str,
+    test_csv: &str,
+    test_json: &str,
+    output_path: &str,
+) -> Result<(), Box<dyn Error>> {
+
+    // load train/test features
+    let (x_train, y_train) = load_csv(train_csv)?;
+    let (x_test, _) = load_csv(test_csv)?;
+
+    let train_ds = Dataset::new(x_train, y_train);
+
+    // train LR
+    let model = LogisticRegression::default()
+        .max_iterations(200)
+        .fit(&train_ds)?;
+
+    let lr_preds = model.predict(&x_test);
+
+    // load raw commands (needed for rules + output)
+    let data = fs::read_to_string(test_json)?;
+    let dataset: Vec<Command> = serde_json::from_str(&data)?;
+
+    // create output file
+    let mut file = fs::File::create(output_path)?;
+
+    // header
+    writeln!(
+        file,
+        "command,true_label,pred_rules,pred_lr,rule_score,lr_score,obfuscation_family,shell_type,difficulty"
+    )?;
+
+    for (i, cmd) in dataset.iter().enumerate() {
+        let rule_pred = rules::predict(&cmd.text);
+        let lr_pred = lr_preds[i] as u8;
+
+        // we don't have scores yet → use placeholder
+        let rule_score = if rule_pred == 1 { 1.0 } else { 0.0 };
+        let lr_score = lr_pred as f32;
+
+        // metadata not present yet → mark unknown
+        let obf = "unknown";
+        let shell = "unknown";
+        let diff = "unknown";
+
+        // escape quotes for CSV safety
+        let clean_cmd = cmd.text.replace("\"", "\"\"");
+
+        writeln!(
+            file,
+            "\"{}\",{},{},{},{:.1},{:.1},{},{},{}",
+            clean_cmd,
+            cmd.label,
+            rule_pred,
+            lr_pred,
+            rule_score,
+            lr_score,
+            obf,
+            shell,
+            diff
+        )?;
+    }
+
+    println!("Saved predictions to {}", output_path);
+
+    Ok(())
 }
