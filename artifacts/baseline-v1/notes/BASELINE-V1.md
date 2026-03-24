@@ -39,3 +39,4 @@ Notes:
 - Synthetic dataset only
 - Current train/test split frozen in artifacts/baseline-v1/datasets
 - Current feature CSVs frozen in artifacts/baseline-v1/features
+- LR scores are class outputs (0/1), not probabilities
