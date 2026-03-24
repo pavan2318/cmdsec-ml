@@ -8,11 +8,11 @@ pub struct Features {
     length: usize,
     special_chars: usize,
     entropy: f64,
-    has_curl: u8,
-    has_wget: u8,
-    has_nc: u8,
-    has_powershell: u8,
-    has_base64: u8,
+//    has_curl: u8,
+//    has_wget: u8,
+//    has_nc: u8,
+//    has_powershell: u8,
+//    has_base64: u8,
     label: u8,
 }
 
@@ -52,11 +52,11 @@ fn extract_features(cmd: &Command) -> Features {
         length: text.len(),
         special_chars: count_special(&text),
         entropy: entropy(&text),
-        has_curl: contains(&text, "curl"),
-        has_wget: contains(&text, "wget"),
-        has_nc: contains(&text, "nc"),
-        has_powershell: contains(&text, "powershell"),
-        has_base64: contains(&text, "base64") | contains(&text, "-enc"),
+//        has_curl: contains(&text, "curl"),
+//        has_wget: contains(&text, "wget"),
+//        has_nc: contains(&text, "nc"),
+//        has_powershell: contains(&text, "powershell"),
+//        has_base64: contains(&text, "base64") | contains(&text, "-enc"),
         label: cmd.label,
     }
 }
