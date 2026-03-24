@@ -8,6 +8,10 @@ pub struct Features {
     length: usize,
     special_chars: usize,
     entropy: f64,
+    digit_ratio: f64,
+    uppercase_ratio: f64,
+    token_count: usize,
+    avg_token_length: f64,
 //    has_curl: u8,
 //    has_wget: u8,
 //    has_nc: u8,
@@ -47,11 +51,23 @@ fn contains(s: &str, keyword: &str) -> u8 {
 
 fn extract_features(cmd: &Command) -> Features {
     let text = cmd.text.to_lowercase();
-
+    let length = text.len();
+    let special_chars = count_special(&text);
+    let entropy_val = entropy(&text);
+    let digits = text.chars().filter(|c| c.is_numeric()).count();
+    let digit_ratio = digits as f64 / text.len() as f64;
+    let uppercase = text.chars().filter(|c| c.is_uppercase()).count();
+    let uppercase_ratio = uppercase as f64 / text.len() as f64;
+    let token_count = text.split_whitespace().count();
+    let avg_token_length = text.len() as f64 / token_count as f64;
     Features {
-        length: text.len(),
-        special_chars: count_special(&text),
-        entropy: entropy(&text),
+        length,
+        special_chars,
+        entropy: entropy_val,
+        digit_ratio,
+        uppercase_ratio,
+        token_count,
+        avg_token_length,
 //        has_curl: contains(&text, "curl"),
 //        has_wget: contains(&text, "wget"),
 //        has_nc: contains(&text, "nc"),
@@ -60,6 +76,7 @@ fn extract_features(cmd: &Command) -> Features {
         label: cmd.label,
     }
 }
+
 
 /* ---------------- PIPELINE ---------------- */
 
